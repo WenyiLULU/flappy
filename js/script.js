@@ -97,6 +97,7 @@ function animate() {
       !(playerY < currentSpace.y + obstacle.space && playerHeight + playerY > currentSpace.y)
     ) {
       gameOver = true;
+      // if bird's left-top is behind obstacle right side & bird's right side > obstacle left side & not(bird's top < space bottom & bird's bottom > space top)
     } else if (
       playerX < currentSpace.x + obstacle.width &&
       playerX + playerWidth > currentSpace.x &&
