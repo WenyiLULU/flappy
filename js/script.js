@@ -38,9 +38,9 @@ let obstTopY = 0;
 const obstTopH = 100;
 
 let obstBottomY = obstTopH + obstSpace;
-const obstBottomH = canvas.height - (obstTopH + obstSpace); */
+const obstBottomH = canvas.height - (obstTopH + obstSpace); */ // variables which we used to initialize obstacle but we don't need anymore. Because we use the class Obstacle to create obstacles
 
-// creat a obstacle class containing all properties so we can create new obstacles e
+// creat a obstacle class containing all properties so we can create new obstacles easier
 class Obstacle {
   constructor() {
     this.width = obstW;
@@ -65,18 +65,18 @@ class Obstacle {
     return { x: currentX, y: currentY };
   } // to return the space position (top-left point of the space) of the obstacle 
 }
-// array which will stock our obstacles
+// array which will stock our obstacles to be draw
 let obstacles = [];
 
-// draw the background image (bgImg) on canvas at position (0, 0) with canvas width and height to cover all surface of the canvas
+// function to draw the background image (bgImg) on canvas at position (0, 0) with canvas width and height to cover all surface of the canvas
 function drawBg() {
   ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
 }
-// draw the bird (playerImg) on the position and size we defined above (line 20-23)
+// function to draw the bird (playerImg) on the position and size we defined above (line 20-23)
 function drawFlappy() {
   ctx.drawImage(playerImg, playerX, playerY, playerWidth, playerHeight);
 }
-// draw obstacles function which takes a obstacle object as argument (a obstacle that we will create in animate)
+//function to draw obstacles which takes a obstacle object as argument (a obstacle that we will create and stock in array "obstacles" in animate)
 function drawObstacle(obstacle) {
   const { bottomH, bottomY, topH, topY, width, xPos } = obstacle; // (Destructuring assignment) get properties from our obstacle and use them as distinct variables
 
@@ -95,15 +95,15 @@ function animate() {
   drawBg(); // draw the background every time animate is called (attention for the order, )
   drawFlappy(); // draw the bird with its current position every time animate is called
 
-  const nextObstacles = []; // prepare a array to stock new obstacles to take the obstacles which is move outside the canvas and rotate with the array we defined above (line 69)
+  const nextObstacles = []; // prepare a array to stock obstacles which is still in the canvas and give them to the array we defined above (line 69) for the next animate 
   obstacles.forEach(obstacle => {
     const currentSpace = obstacle.getSpacePosition();
 
     // collision detect conditions
-    /* if (
+    if (
       playerX < obstacle.xPos + obstacle.width &&
       playerX + playerWidth > obstacle.xPos &&
-     / !(playerY < currentSpace.y + obstacle.space && playerHeight + playerY > currentSpace.y)
+      !(playerY < currentSpace.y + obstacle.space && playerHeight + playerY > currentSpace.y)
     ) {
       gameOver = true;
       console.log("gameOver")
@@ -119,49 +119,49 @@ function animate() {
     } else {
       // no collision
       console.log("ok");
-    } */
+    }
 
     drawObstacle(obstacle);
     if (obstacle.xPos > -obstacle.width) {
       nextObstacles.push(obstacle);
-    } // if the current obstacle is still in the screen we push the current obstacle in nextObstacles (-obstacle.width to make sure that all width of obstcale is out)
+    } // if the current obstacle is still in the screen we push the current obstacle in nextObstacles (< -obstacle.width is to check if all width of obstcale is out)
   }); 
 
-  obstacles = nextObstacles; 
-  console.log({obstacles, nextObstacles})
+  obstacles = nextObstacles; // so the array "obstacles" will contain only the ones which are still in the canvas. 
 
-  // Do not try to copy classe instances this way
-  //obstacles = JSON.parse(JSON.stringify(currentObstacles)); // deep copy of array of obstacles to make sure not to change the origin one
+  // Do not try to copy classe instances this way the method will not be copied
+  //obstacles = JSON.parse(JSON.stringify(currentObstacles)); // deep copy the currentObstacles to make sure not to change the origin one
 
   if (animationId % 100 === 0) {
     obstacles.push(new Obstacle());
-  } // every 100 times the animate is called we creat a new obstacle and put it in obstacles array
+  } // every 100 times the animate is called we creat a new obstacle and put it in obstacles array (so in the array "obstacles" we will have the old ones which is still in the screen and a new one)
   if (gameOver) {
-    cancelAnimationFrame(animationId);
+    cancelAnimationFrame(animationId); 
   } else {
     animationId = requestAnimationFrame(animate); // a new id every time animate is called
   }
 }
 
+// call "animate" function when "startGame" function is called
 function startGame() {
   animate();
-}
+} 
 
 window.addEventListener("keydown", event => {
   if (event.code === "Space") {
     gravity = -gravitySpeed;
   }
-});
+}); // when key "Space" is pressed make the bird move up
 
 window.addEventListener("keyup", event => {
   if (event.code === "Space") {
     gravity = gravitySpeed;
   }
-});
+});// when key "Space" is released let the bird move down
 
-// event when we refresh the page
+// event when we refresh the page do the callback function
 window.addEventListener("load", () => {
   startBtn.addEventListener("click", () => {
     startGame();
-  });
+  }); // if the starBtn is clicked call startGame function
 });
