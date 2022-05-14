@@ -1,7 +1,9 @@
-const canvas = document.getElementById("my-canvas"); // first things to do : get the elements from html file what we will work on
+// first things to do : get the elements from html file what we will work with later
+const canvas = document.getElementById("my-canvas"); 
 const ctx = canvas.getContext("2d");
 const startBtn = document.getElementById("start-button");
 
+// declare variables to stock the images that we will draw on the canvas. ".src" method is to give the source of image to the image variable
 const bgImg = new Image();
 bgImg.src = "../images/bg.png";
 
@@ -14,13 +16,15 @@ obstTop.src = "../images/obstacle_top.png";
 const obstBottom = new Image();
 obstBottom.src = "../images/obstacle_bottom.png";
 
+// variables for bird 
 let playerX = 20;
 let playerY = 20;
 const playerWidth = 40;
 const playerHeight = 30;
-const gravitySpeed = 3;
-let gravity = gravitySpeed;
+const gravitySpeed = 3; // speed of the bird to fall down if no command given to it
+let gravity = gravitySpeed; 
 
+// variable for chacking if the game over condition is completed 
 let gameOver = false;
 
 // Obstacles variables
@@ -36,21 +40,22 @@ const obstTopH = 100;
 let obstBottomY = obstTopH + obstSpace;
 const obstBottomH = canvas.height - (obstTopH + obstSpace); */
 
+// creat a obstacle class containing all properties so we can create new obstacles e
 class Obstacle {
   constructor() {
     this.width = obstW;
     this.space = obstSpace;
     this.speed = obstSpeed;
-    this.xPos = 400;
+    this.xPos = 400; // at the right side of canvas
     this.topY = 0;
 
-    this.topH = 50 + Math.floor(Math.random() * (canvas.height - 100)); // to get a random height between (0 - canvas.height -100)
-    this.bottomY = this.topH + this.space;
+    this.topH = 50 + Math.floor(Math.random() * (canvas.height - 100)); // to get a random height between (0 to anvas.height -100)
+    this.bottomY = this.topH + this.space; 
     this.bottomH = canvas.height - (this.topH + this.space);
-  }
+  } // hint the position of a element in canvas is it's top-left point
 
   move() {
-    this.xPos += this.speed;
+    this.xPos += this.speed; // method to make obstacle move 3 units to the left (since this.speed = obstSpeed = -3) 
   }
 
   getSpacePosition() {
@@ -58,73 +63,79 @@ class Obstacle {
     const currentY = canvas.height - this.bottomH - this.space;
 
     return { x: currentX, y: currentY };
-  } // to return the space position in a objet
+  } // to return the space position (top-left point of the space) of the obstacle 
 }
 // array which will stock our obstacles
 let obstacles = [];
 
+// draw the background image (bgImg) on canvas at position (0, 0) with canvas width and height to cover all surface of the canvas
 function drawBg() {
   ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
 }
-
+// draw the bird (playerImg) on the position and size we defined above (line 20-23)
 function drawFlappy() {
   ctx.drawImage(playerImg, playerX, playerY, playerWidth, playerHeight);
 }
-
+// draw obstacles function which takes a obstacle object as argument (a obstacle that we will create in animate)
 function drawObstacle(obstacle) {
-  const { bottomH, bottomY, topH, topY, width, xPos } = obstacle; // get properties from our obstacle
+  const { bottomH, bottomY, topH, topY, width, xPos } = obstacle; // (Destructuring assignment) get properties from our obstacle and use them as distinct variables
 
-  obstacle.move();
+  obstacle.move(); // call the move method of the obstacle to make it move
 
   ctx.drawImage(obstTop, xPos, topY, width, topH);
   ctx.drawImage(obstBottom, xPos, bottomY, width, bottomH);
 }
 
-let animationId;
+let animationId; // prepare a variable to take current animationId, which is like a counter of the number of times the function "animate" was called
 
+// create animate loop: every elements supposed to move / change need to be called inside
 function animate() {
-  playerY += gravity;
+  playerY += gravity; // make the bird fall down with a speed we seted above (line 24-25)
 
-  drawBg();
-  drawFlappy();
+  drawBg(); // draw the background every time animate is called (attention for the order, )
+  drawFlappy(); // draw the bird with its current position every time animate is called
 
-  const nextObstacles = [];
+  const nextObstacles = []; // prepare a array to stock new obstacles to take the obstacles which is move outside the canvas and rotate with the array we defined above (line 69)
   obstacles.forEach(obstacle => {
     const currentSpace = obstacle.getSpacePosition();
-    if (
+
+    // collision detect conditions
+    /* if (
       playerX < obstacle.xPos + obstacle.width &&
       playerX + playerWidth > obstacle.xPos &&
-      !(playerY < currentSpace.y + obstacle.space && playerHeight + playerY > currentSpace.y)
+     / !(playerY < currentSpace.y + obstacle.space && playerHeight + playerY > currentSpace.y)
     ) {
       gameOver = true;
-      // if bird's left-top is behind obstacle right side & bird's right side > obstacle left side & not(bird's top < space bottom & bird's bottom > space top)
+      console.log("gameOver")
+      // if bird's left-top is behind obstacle right side & bird's right side is on the right of obstacle left side & (bird's top under space bottom & bird's bottom above space top) is not true
     } else if (
       playerX < currentSpace.x + obstacle.width &&
       playerX + playerWidth > currentSpace.x &&
       playerY < currentSpace.y + obstacle.space &&
       playerHeight + playerY > currentSpace.y
     ) {
-      // collision detected!
+      // pass through space!
       console.log("Space");
     } else {
       // no collision
       console.log("ok");
-    }
+    } */
 
     drawObstacle(obstacle);
     if (obstacle.xPos > -obstacle.width) {
       nextObstacles.push(obstacle);
-    }
-  }); // if the current obstacle is still in the screen we push a new one in (-obstacle.width to make sure that all width of obstcale is out)
+    } // if the current obstacle is still in the screen we push the current obstacle in nextObstacles (-obstacle.width to make sure that all width of obstcale is out)
+  }); 
 
-  obstacles = nextObstacles;
+  obstacles = nextObstacles; 
+  console.log({obstacles, nextObstacles})
 
   // Do not try to copy classe instances this way
   //obstacles = JSON.parse(JSON.stringify(currentObstacles)); // deep copy of array of obstacles to make sure not to change the origin one
 
   if (animationId % 100 === 0) {
     obstacles.push(new Obstacle());
-  } // every 100 times we creat a new obstacle and put it in obstacle array
+  } // every 100 times the animate is called we creat a new obstacle and put it in obstacles array
   if (gameOver) {
     cancelAnimationFrame(animationId);
   } else {
